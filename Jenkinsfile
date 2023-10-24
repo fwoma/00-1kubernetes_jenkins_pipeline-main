@@ -3,13 +3,13 @@ pipeline {
 	agent any
 /*	
 	tools {
-        maven "maven3"
+        maven "maven"
     }
 */	
     environment {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
-        NEXUS_URL = "172.31.40.209:8081"
+        NEXUS_URL = "172.31.20.35:8081"
         NEXUS_REPOSITORY = "vprofile-release"
 	NEXUS_REPO_ID    = "vprofile-release"
         NEXUS_CREDENTIAL_ID = "nexuslogin"
@@ -60,7 +60,7 @@ pipeline {
           }
 
           steps {
-            withSonarQubeEnv('sonar-pro') {
+            withSonarQubeEnv('sonar') {
                sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
                    -Dsonar.projectName=vprofile-repo \
                    -Dsonar.projectVersion=1.0 \
