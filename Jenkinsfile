@@ -69,7 +69,7 @@ pipeline {
                    -Dsonar.junit.reportsPath=target/surefire-reports/ \
                    -Dsonar.jacoco.reportsPath=target/jacoco.exec \
                    -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
-		   -D sonar.host.url=http://172.31.29.21:9000/
+		   ${scannerCmd} -Dsonar.host.url=http://172.31.29.21:9000/
 		   -D sonar.login=admin \
                    -D sonar.password=Location#1 \
             }
