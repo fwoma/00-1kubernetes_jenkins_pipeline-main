@@ -1,24 +1,24 @@
 pipeline {
-    
-	agent any
-	
-	tools {
+    agent any
+
+    tools {
         maven "maven"
+        jdk "Java8" // Assuming you have a tool configured named "Java8"
+        // Add a tool for "sonar" if not already configured
     }
 
     environment {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
-        NEXUS_URL = "172.31.20.35:8081"
+        NEXUS_URL = "http://172.31.20.35:8081" // Corrected the URL
         NEXUS_REPOSITORY = "vprofile-release"
-	NEXUS_REPO_ID    = "vprofile-release"
+        NEXUS_REPO_ID = "vprofile-release"
         NEXUS_CREDENTIAL_ID = "nexuslogin"
         ARTVERSION = "${env.BUILD_ID}"
     }
-	
-    stages{
-        
-        stage('BUILD'){
+
+    stages {
+        stage('BUILD') {
             steps {
                 sh 'mvn clean install -DskipTests'
             }
@@ -30,19 +30,19 @@ pipeline {
             }
         }
 
-	stage('UNIT TEST'){
+        stage('UNIT TEST') {
             steps {
                 sh 'mvn test'
             }
         }
 
-	stage('INTEGRATION TEST'){
+        stage('INTEGRATION TEST') {
             steps {
-                sh 'mvn verify -DskipUnitTests'
+                sh 'mvn verify -DskipTests'
             }
         }
-		
-        stage ('CODE ANALYSIS WITH CHECKSTYLE'){
+
+        stage('CODE ANALYSIS WITH CHECKSTYLE') {
             steps {
                 sh 'mvn checkstyle:checkstyle'
             }
@@ -54,30 +54,28 @@ pipeline {
         }
 
         stage('CODE ANALYSIS with SONARQUBE') {
-          
-		  environment {
-             scannerHome = tool 'sonar'
-          }
-
-         steps {
-    withSonarQubeEnv('sonar') {
-        script {
-            def java8Home = tool name: 'Java8', type: 'jdk'
-            sh """${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=Location#1 \
-                -Dsonar.projectName=vprofile-repo \
-                -Dsonar.projectVersion=1.0 \
-                -Dsonar.sources=src/ \
-                -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
-                -Dsonar.junit.reportsPath=target/surefire-reports/ \
-                -Dsonar.jacoco.reportsPath=target/jacoco.exec \
-                -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml"""
-		   
+            environment {
+                scannerHome = tool 'sonar'
             }
+            steps {
+                withSonarQubeEnv('sonar') {
+                    script {
+                        def java8Home = tool name: 'Java8', type: 'jdk'
+                        sh """${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=Location#1 \
+                            -Dsonar.projectName=vprofile-repo \
+                            -Dsonar.projectVersion=1.0 \
+                            -Dsonar.sources=src/ \
+                            -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
+                            -Dsonar.junit.reportsPath=target/surefire-reports/ \
+                            -Dsonar.jacoco.reportsPath=target/jacoco.exec \
+                            -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml"""
+                    }
 
-            timeout(time: 10, unit: 'MINUTES') {
-               waitForQualityGate abortPipeline: true
+                    timeout(time: 10, unit: 'MINUTES') {
+                        waitForQualityGate abortPipeline: true
+                    }
+                }
             }
-          }
         }
 
         stage("Publish to Nexus Repository Manager") {
@@ -88,7 +86,7 @@ pipeline {
                     echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
                     artifactPath = filesByGlob[0].path;
                     artifactExists = fileExists artifactPath;
-                    if(artifactExists) {
+                    if (artifactExists) {
                         echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version} ARTVERSION";
                         nexusArtifactUploader(
                             nexusVersion: NEXUS_VERSION,
@@ -100,25 +98,20 @@ pipeline {
                             credentialsId: NEXUS_CREDENTIAL_ID,
                             artifacts: [
                                 [artifactId: pom.artifactId,
-                                classifier: '',
-                                file: artifactPath,
-                                type: pom.packaging],
+                                    classifier: '',
+                                    file: artifactPath,
+                                    type: pom.packaging],
                                 [artifactId: pom.artifactId,
-                                classifier: '',
-                                file: "pom.xml",
-                                type: "pom"]
+                                    classifier: '',
+                                    file: "pom.xml",
+                                    type: "pom"]
                             ]
                         );
-                    } 
-		    else {
+                    } else {
                         error "*** File: ${artifactPath}, could not be found";
                     }
                 }
             }
         }
-
-
     }
-
-
 }
