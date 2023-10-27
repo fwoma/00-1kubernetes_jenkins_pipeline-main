@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         maven "maven"
-        jdk "Java8" // Assuming you have a tool configured named "Java8"
+       // jdk "Java8" // Assuming you have a tool configured named "Java8"
         // Add a tool for "sonar" if not already configured
     }
 
