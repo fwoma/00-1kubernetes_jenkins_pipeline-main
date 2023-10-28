@@ -3,14 +3,12 @@ pipeline {
 
     tools {
         maven "maven"
-       // jdk "Java8" // Assuming you have a tool configured named "Java8"
-        // Add a tool for "sonar" if not already configured
     }
 
     environment {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
-        NEXUS_URL = "http://172.31.20.35:8081" // Corrected the URL
+        NEXUS_URL = "172.31.20.35:8081"
         NEXUS_REPOSITORY = "vprofile-release"
         NEXUS_REPO_ID = "vprofile-release"
         NEXUS_CREDENTIAL_ID = "nexuslogin"
@@ -38,7 +36,7 @@ pipeline {
 
         stage('INTEGRATION TEST') {
             steps {
-                sh 'mvn verify -DskipTests'
+                sh 'mvn verify -DskipUnitTests'
             }
         }
 
@@ -55,12 +53,11 @@ pipeline {
 
         stage('CODE ANALYSIS with SONARQUBE') {
             environment {
-                scannerHome = tool 'sonar'
+                scannerHome = tool name: 'Java8', type: 'jdk'
             }
             steps {
                 withSonarQubeEnv('sonar') {
                     script {
-                        def java8Home = tool name: 'Java8', type: 'jdk'
                         sh """${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=Location#1 \
                             -Dsonar.projectName=vprofile-repo \
                             -Dsonar.projectVersion=1.0 \
@@ -81,13 +78,13 @@ pipeline {
         stage("Publish to Nexus Repository Manager") {
             steps {
                 script {
-                    pom = readMavenPom file: "pom.xml";
-                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
+                    pom = readMavenPom file: "pom.xml"
+                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}")
                     echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
-                    artifactPath = filesByGlob[0].path;
-                    artifactExists = fileExists artifactPath;
+                    artifactPath = filesByGlob[0].path
+                    artifactExists = fileExists artifactPath
                     if (artifactExists) {
-                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version} ARTVERSION";
+                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version} ARTVERSION"
                         nexusArtifactUploader(
                             nexusVersion: NEXUS_VERSION,
                             protocol: NEXUS_PROTOCOL,
@@ -106,9 +103,9 @@ pipeline {
                                     file: "pom.xml",
                                     type: "pom"]
                             ]
-                        );
+                        )
                     } else {
-                        error "*** File: ${artifactPath}, could not be found";
+                        error "*** File: ${artifactPath}, could not be found"
                     }
                 }
             }
