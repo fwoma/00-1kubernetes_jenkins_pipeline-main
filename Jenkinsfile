@@ -43,7 +43,7 @@ node {
 
     stage('SonarQube analysis') {
         try {
-            withSonarQubeEnv('My SonarQube Server') {
+            withSonarQubeEnv('sonar') {
                 sh "${scannerHome}/bin/sonar-scanner"
             }
             timeout(time: 10, unit: 'MINUTES') {
