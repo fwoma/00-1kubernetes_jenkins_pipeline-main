@@ -53,7 +53,7 @@ pipeline {
 
         stage('CODE ANALYSIS with SONARQUBE') {
             environment {
-                scannerHome = tool name: 'Java8', type: 'jdk'
+                scannerHome = tool name: 'Java-8', type: 'jdk'
             }
             steps {
                 withSonarQubeEnv('sonar') {
