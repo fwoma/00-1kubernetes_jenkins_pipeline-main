@@ -55,7 +55,7 @@ pipeline {
             environment {
                 scannerHome = tool name: 'Java-8', type: 'jdk'
             }
-            steps {
+          //  steps {
                 withSonarQubeEnv('sonar') {
                     script {
                         sh """${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=Location#1 \
@@ -70,7 +70,7 @@ pipeline {
 
                     timeout(time: 10, unit: 'MINUTES') {
                         waitForQualityGate abortPipeline: true
-                    }
+                  //  }
                 }
             }
         }
