@@ -51,11 +51,11 @@ pipeline {
             }
         }
 
-        stage('CODE ANALYSIS with SONARQUBE') {
+        //stage('CODE ANALYSIS with SONARQUBE') {
             environment {
                 scannerHome = tool name: 'Java-8', type: 'jdk'
             }
-          //  steps {
+            steps {
                 withSonarQubeEnv('sonar') {
                     script {
                         sh """${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=Location#1 \
@@ -66,7 +66,7 @@ pipeline {
                             -Dsonar.junit.reportsPath=target/surefire-reports/ \
                             -Dsonar.jacoco.reportsPath=target/jacoco.exec \
                             -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml"""
-                   // }
+                  //  }
 
                     timeout(time: 10, unit: 'MINUTES') {
                         waitForQualityGate abortPipeline: true
