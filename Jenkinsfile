@@ -1,5 +1,5 @@
 node {
-    def scannerHome = tool 'Sonar'
+    def scannerHome = tool 'Sonarqube'
     
     stage('BUILD') {
         try {
