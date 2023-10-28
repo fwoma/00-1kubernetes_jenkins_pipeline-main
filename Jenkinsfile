@@ -1,5 +1,5 @@
 node {
-    def scannerHome = tool 'Sonarqube'
+    def scannerHome = tool name: 'SonarQube Scanner 5.0.1.3006', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
     
     stage('BUILD') {
         try {
